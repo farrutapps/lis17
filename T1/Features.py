@@ -1,137 +1,80 @@
-from abc import ABCMeta, abstractmethod
-import math
 import numpy as np
+import csv_manager as cm
+
+class Feature:
+
+	### initializer:
+	## arguments:
+	# x_column_index: array listing the ids of the data points that shall be multiplied
+	# method name: name of the method that shall be applied to the data on evaluation. Must be listed in the method register_methods.
+	def __init__(self, x_column_index, method_name):
+		
+		self._register_methods()
+		self.x_column_index = x_column_index    
+		self.method_name = method_name	
+
+	## Private method. do not use from outside the class. 
+	# Used to initialize the list of feature models.
+	def _register_methods(self):
+		
+		# NOTE: the keys of the dictionaries are strings. If necessary to iterate through the entries of the dicitonary, use function dict.keys() to obtain a list.
+		self.methods = {}
+
+		self.methods['multiply']= self.multiply
+		self.methods['exp'] = self.exp
+		self.methods['log'] = self.log
+
+	### evaluate:
+	## arguments:
+	# x: np.array with one dimension = 1. The data it contains will be evaluated corresponding to the indexes and method_name specified when initilializing the class. 
+	def evaluate(self, x):
+		return self.methods[self.method_name](x, self.x_column_index) 
+
+	### multiply:
+	# multiplies the elements of data specified by the indexes in x_column_index.
+	#
+	## arguments: 
+	# x: np.array with one dimension = 1. 
+	# x_column_index: array listing the ids of the data points that shall be multiplied
+	#
+	## return value: 
+	# result of the multiplication
+	def multiply(self,x, x_column_index):
+		result = 1
+
+		for i in x_column_index:
+			result *= x[i]
+
+		return result
+
+	### exp:
+	# returns exp(xi + xj + ...) of the specified data.
+	# arguments see method 'multiply'
+	def exp(self, x, x_column_index):
+		x_sum = 0
+
+		for i in x_column_index:
+			x_sum += x[i]
+
+		return np.exp(x_sum)
+
+	### log:
+	# returns log(xj * xi * ...) of the specified data
+	def log(self, x, x_column_index):
+		return np.log(self.multiply(x,x_column_index))
 
 
-class Feature():
-  """
-  Feature base class.
-  """
-  __metaClass__ = ABCMeta
 
-  @abstractmethod
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    pass
+#TODO: Discuss how to handle functions exp and ln when x has more than one element. Excepiton? Define otherwise?
 
 
-# Feature classes
-class LinearX1(Feature):
+### Testing Sebastian
 
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x1
+# man = cm.CsvManager('data')
+# data = man.restore_from_file('test.csv') 
 
-class LinearX2(Feature):
+# indexes = np.array([0,0])
+# feature = Feature(indexes,'multiply')
 
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x2
-
-class LinearX3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x3
-
-class LinearX4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x4
-
-
-class SquareX1(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x1**2
-
-class SquareX2(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x2**2
-
-class SquareX3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x3**2
-
-class SquareX4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x4**2
-
-
-class CrossTermX1X2(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x1 * x2
-
-class CrossTermX1X3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x1 * x3
-
-class CrossTermX1X4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x1 * x4
-
-class CrossTermX2X3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x2 * x3
-
-class CrossTermX2X4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x2 * x4
-
-class CrossTermX3X4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return x3 * x4
-
-
-class ExpX1(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.exp(x1)
-
-class ExpX2(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.exp(x2)
-
-class ExpX3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.exp(x3)
-
-class ExpX4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.exp(x4)
-
-
-class LogX1(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.log(x1)
-
-class LogX2(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.log(x2)
-
-class LogX3(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.log(x3)
-
-class LogX4(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return math.log(x4)
-
-
-class Identity(Feature):
-
-  def evaluate(self, x1, x2, x3 = 0, x4 = 0):
-    return 1
-
+# for line in data[:,1:15]:
+# 	print feature.evaluate(line)
