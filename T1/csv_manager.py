@@ -31,10 +31,13 @@ class CsvManager():
 ## arguments:
 # filename: string of filename for storage
 # data: np.array containing the data. Ids, input and output need to be merged already
-# set_header: string that is the first line in the data file
+# header: np.array dimensions (1,n) containing header strings
 
 ## return value: None
   def save_to_file(self,filename, data, header):
+    
+    if not (data.shape[1] == header.shape[1] and header.shape[0] == 1):
+      raise ValueError("RETARD! Header must be of dimensions (1,n). n is number of columns of data.")
 
     path = self._filepath(filename)
     file = open(path, 'wb')
@@ -55,3 +58,16 @@ class CsvManager():
     data = np.loadtxt(file, delimiter=",", skiprows=1)
 
     return data
+
+
+
+### TESTING
+
+# man = CsvManager('/Users/Sebastian/Programming/ETHProg/LIS/T1/data')
+
+# data = man.restore_from_file('test.csv')
+
+# print data
+
+# header = np.array(['id','x1']).reshape((1,2))
+# man.save_to_file('hallo.csv', data[:,0:2], header)
