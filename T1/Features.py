@@ -10,7 +10,7 @@ class Feature:
 	def __init__(self, x_column_index, method_name):
 		
 		self._register_methods()
-		self.x_column_index = x_column_index    
+		self.x_column_index = x_column_index.reshape(max(x_column_index.shape))
 		self.method_name = method_name	
 
 	## Private method. do not use from outside the class. 
@@ -68,13 +68,13 @@ class Feature:
 #TODO: Discuss how to handle functions exp and ln when x has more than one element. Excepiton? Define otherwise?
 
 
-### Testing Sebastian
+### Testing Sebastian, Sam
 
-man = cm.CsvManager('data')
-data = man.restore_from_file('test.csv')
+# man = cm.CsvManager('data')
+# data = man.restore_from_file('test.csv')
 
-indexes = np.array([0,1])
-feature = Feature(indexes,'multiply')
+# indexes = np.array([0,1]).reshape(1,2)
+# feature = Feature(indexes,'multiply')
 
-for line in data[:,1:15]:
-	print feature.evaluate(line)
+# for line in data[0:5,1:15]:
+# 	print feature.evaluate(line)
