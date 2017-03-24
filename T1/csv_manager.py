@@ -31,18 +31,14 @@ class CsvManager():
 ## arguments:
 # filename: string of filename for storage
 # data: np.array containing the data. Ids, input and output need to be merged already
-# set_header: bool that determines whether the first line in the file shall be "Id,y"
+# set_header: string that is the first line in the data file
 
 ## return value: None
-  def save_to_file(self,filename, data, set_header = False):
+  def save_to_file(self,filename, data, header):
 
     path = self._filepath(filename)
     file = open(path, 'wb')
-
-    if set_header:
-      header =np.array(['Id,y'])
-      np.savetxt(file,header, delimiter= ',', fmt ='%s')
-    
+    np.savetxt(file,header, delimiter= ',', fmt ='%s')
     np.savetxt(file,data, delimiter = ',')
     
 ### restore_from file: 
