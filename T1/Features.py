@@ -5,7 +5,7 @@ class Feature:
 
 	### initializer:
 	## arguments:
-	# x_column_index: array listing the ids of the data points that shall be multiplied
+	# x_column_index: array listing the indices of the data points that shall be multiplied
 	# method name: name of the method that shall be applied to the data on evaluation. Must be listed in the method register_methods.
 	def __init__(self, x_column_index, method_name):
 		
@@ -70,11 +70,11 @@ class Feature:
 
 ### Testing Sebastian
 
-# man = cm.CsvManager('data')
-# data = man.restore_from_file('test.csv') 
+man = cm.CsvManager('data')
+data = man.restore_from_file('test.csv')
 
-# indexes = np.array([0,0])
-# feature = Feature(indexes,'multiply')
+indexes = np.array([0,1])
+feature = Feature(indexes,'multiply')
 
-# for line in data[:,1:15]:
-# 	print feature.evaluate(line)
+for line in data[:,1:15]:
+	print feature.evaluate(line)
