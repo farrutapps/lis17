@@ -14,7 +14,7 @@ class ProgrammaticError(Exception):
 
 class LinearRegression():
   """
-  Class for linear regression.
+  Class for linear regression model.
   """
   # Members
   # Vector in equation: y = F(x,y) * beta, where F(x,y) is the feature vector.
