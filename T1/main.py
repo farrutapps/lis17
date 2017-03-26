@@ -4,7 +4,7 @@
 import numpy as np
 import csv_manager
 from features import Feature
-import linear_regression as lin_reg
+import lin_reg
 import matplotlib.pyplot as plt
 
 # Remove lapack warning on OSX (https://github.com/scipy/scipy/issues/5998).
@@ -12,7 +12,17 @@ import warnings
 warnings.filterwarnings(action="ignore", module="scipy",
                         message="^internal gelsd")
 
+# computes feature matrix
+def feature_transform(feature_vec, x):
+  n_features = len(feature_vec)
+  n_samples = x.shape[0]
 
+  x_tf = np.zeros([n_samples, n_features])
+  for i in range(n_samples):
+    for j in range(n_features):
+      x_tf[i, j] = feature_vec[j].evaluate(x[i,:])
+
+  return x_tf
 
 # loading training data
 data_loader = csv_manager.CsvManager('data')
@@ -21,12 +31,11 @@ n_samples = data_train.shape[0]
 n_dimensions_x = 15
 n_dimensions_y = 1
 
-#shuffle order of samples. This maakes sure that training and validation sets contain random samples.
+#shuffle order of samples. This makes sure that training and validation sets contain random samples.
 np.random.shuffle(data_train)
 ids = data_train[:,0].reshape(n_samples,1)
 y_source = data_train[:,1].reshape(n_samples,n_dimensions_y)
 x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
-
 
 # Split data into training and validation
 ratio_train_validate = 0.8
@@ -37,21 +46,22 @@ x_validate = x_source[idx_switch:, :]
 y_validate = y_source[idx_switch:, :]
 
 #Feature Vector
-feature_vec = [Feature([0,0],'multiply'),Feature([14],'exp')] ## TODO: Select model
+feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')] ## TODO: Select model
 
-# Compute feature matrix
-n_features = len(feature_vec)
-	x_transformed = np.zeros([n_samples, n_features])
-    for i in range(n_samples):
-      for j in range(n_features):
-        x_transformed[i, j] = feature_vec[j].evaluate(x)
+# Transform samples
+x_train_tf = feature_transform(feature_vec,x_train)
+x_test_tf = feature_transform(feature_vec,x_test)
+x_validate_tf = feature_transform(feature_vec,x_validate)
 
 # Linear Regression
 lm = lin_reg.LinearRegression()
-lm.fit(x_transformed, y_train)
+# Compute feature matrix
+
+lm.fit(x_train_tf, y_train)
  
 # Validation
-rmse = lm.validate(x_validate, y_validate)**0.5
+
+rmse = lm.validate(x_validate_tf, y_validate)**0.5
 print('RMSE: {}'.format(rmse))
 print(' ')
 print('feature weights \n{}'.format(lm.beta))
@@ -63,10 +73,11 @@ ids_test = data_test[:,0].reshape(n_samples_test,1)
 x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
 
 # predict output
-y_test = lm.predict(x_test)
+
+y_test = lm.predict(x_test_tf)
 
 #save output
 header = np.array(['id','y']).reshape(1,2)
 dump_data = np.hstack((ids_test,y_test))
-data_loader.save_to_file('sample.csv',dump_data,header)
+data_loader.save_to_file('results.csv',dump_data,header)
 

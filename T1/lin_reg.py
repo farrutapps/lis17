@@ -36,11 +36,11 @@ class LinearRegression():
     self.beta = np.dot(np.linalg.pinv(x), y)
     self.fitting_done = True
 
-  def predict(self):
+  def predict(self,x):
     if not self.fitting_done:
       raise ProgrammaticError("Before you use the model for query, you have "
                               "to set the feature vector and fit it.")
-    return np.dot(self.x, self.beta)
+    return np.dot(x, self.beta)
 
   ##returns mean squared error
   def validate(self, x_validate, y_validate):
