@@ -4,7 +4,7 @@
 import numpy as np
 import csv_manager
 import Features as features
-import LinearRegressionModel as model
+import linear_regression as lin_reg
 import matplotlib.pyplot as plt
 
 # Remove lapack warning on OSX (https://github.com/scipy/scipy/issues/5998).
@@ -16,13 +16,13 @@ warnings.filterwarnings(action="ignore", module="scipy",
 
 # loading training data
 data_loader = csv_manager.CsvManager('data')
-training_data = data_loader.restore_from_file('train.csv')
+data_train = data_loader.restore_from_file('train.csv')
 n_samples = training_data.shape[0]
-n_dimensions_input = 15
-n_dimensions_output = 1
-id_data = training_data[:,0].reshape(n_samples,1)
-output_data = training_data[:,1:n_dimensions_output+1].reshape(n_samples,n_dimensions_output)
-input_data = training_data[:,n_dimensions_output+1:].reshape(n_samples,n_dimensions_input)
+n_dimensions_x = 15
+n_dimensions_y = 1
+ids = data_train[:,0].reshape(n_samples,1)
+y_train = data_train[:,1].reshape(n_samples,n_dimensions_y)
+x_train = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 
 
 # Split data into training and validation
@@ -33,10 +33,20 @@ training_output = output_data[:idx_switch, :]
 validation_input = input_data[idx_switch:, :]
 validation_output = output_data[idx_switch:, :]
 
+#Feature Vector
+feature_vec = [features.LinearX1(), features.Identity()] ## TODO: Select model
 
-# Fit model
-lm = model.LinearRegressionModel()
-lm.set_feature_vector([features.LinearX1(), features.Identity()])
+# Compute feature matrix
+n_features = len(self.feature_vec)
+	x_transformed = np.zeros([n_samples, n_features])
+    for i in range(n_samples):
+      for j in range(n_features):
+        x_transformed[i, j] = self.feature_vec[j].evaluate(x)
+
+
+
+# Linear Regression
+lm = lin_reg.LinearRegression()
 lm.fit(training_input, training_output)
 
 
