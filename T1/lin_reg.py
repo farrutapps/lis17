@@ -29,7 +29,7 @@ class LinearRegression:
         self.fitting_done = True
 
 
-    ### validate: calculate error with given beta, x, y
+    ### validate: calculate error with given beta, X, y
     ## arguments:
     # X: transformed feature matrix, X = PHI(x)
     #    np.array of dimensions (n,f). n number of samples, f number of features. containing the data
@@ -57,23 +57,25 @@ class LinearRegression:
     def error_function(self, predictions, target_values):
         return (predictions - target_values)**2
 
-    # get beta
+
+    # helper: get beta used for testing
     def get_beta(self):
         return self.beta
 
+
 ### Testing: Sam
-# generate data
 N = 100
 x = np.linspace(0, 1, N)
 beta = np.array([2, 1])
 y_true = beta[0]*x + beta[1]
-y = y_true + + 0.1*np.random.randn(x.shape[0]);
+y = y_true + 0.1*np.random.randn(x.shape[0]);
 if False:
     plt.plot(x,y)
     plt.show()
-X = np.hstack( (x.reshape(N,1), np.ones(N).reshape(N,1) ))
+X = np.hstack( (x.reshape(N,1), np.ones((N,1)) ))
 
 lm = LinearRegression()
 lm.fit(X, y)
+print("validate with true data (not possible): {}".format(lm.validate(X, y_true)))
 print("predict y=2*0.5 + 1 = {}".format( lm.predict([0.5, 1.0])) )
 print("beta_est = {}".format(lm.get_beta()))
