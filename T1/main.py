@@ -6,23 +6,27 @@ import csv_manager
 from features import Feature
 import lin_reg
 import matplotlib.pyplot as plt
+import sys
 
 # Remove lapack warning on OSX (https://github.com/scipy/scipy/issues/5998).
 import warnings
 warnings.filterwarnings(action="ignore", module="scipy",
                         message="^internal gelsd")
+# supress .pyc files
+sys.dont_write_bytecode = True
+
 
 # computes feature matrix
 def feature_transform(feature_vec, x):
-  n_features = len(feature_vec)
-  n_samples = x.shape[0]
+    n_features = len(feature_vec)
+    n_samples = x.shape[0]
 
-  x_tf = np.zeros([n_samples, n_features])
-  for i in range(n_samples):
-    for j in range(n_features):
-      x_tf[i, j] = feature_vec[j].evaluate(x[i,:])
+    x_tf = np.zeros([n_samples, n_features])
+    for i in range(n_samples):
+        for j in range(n_features):
+            x_tf[i, j] = feature_vec[j].evaluate(x[i,:])
 
-  return x_tf
+    return x_tf
 
 # loading training data
 data_loader = csv_manager.CsvManager('data')
@@ -50,34 +54,31 @@ feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')
 
 # Transform samples
 x_train_tf = feature_transform(feature_vec,x_train)
-x_test_tf = feature_transform(feature_vec,x_test)
 x_validate_tf = feature_transform(feature_vec,x_validate)
 
 # Linear Regression
 lm = lin_reg.LinearRegression()
+
 # Compute feature matrix
-
 lm.fit(x_train_tf, y_train)
- 
-# Validation
 
+# Validation
 rmse = lm.validate(x_validate_tf, y_validate)**0.5
 print('RMSE: {}'.format(rmse))
 print(' ')
 print('feature weights \n{}'.format(lm.beta))
 
-# load test data
+# load test data and transform samples
 data_test = data_loader.restore_from_file('test.csv')
 n_samples_test = data_test.shape[0]
 ids_test = data_test[:,0].reshape(n_samples_test,1)
 x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
+x_test_tf = feature_transform(feature_vec,x_test)
 
 # predict output
-
 y_test = lm.predict(x_test_tf)
 
 #save output
 header = np.array(['id','y']).reshape(1,2)
 dump_data = np.hstack((ids_test,y_test))
 data_loader.save_to_file('results.csv',dump_data,header)
-

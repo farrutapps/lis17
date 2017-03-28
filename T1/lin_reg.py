@@ -1,5 +1,8 @@
 import numpy as np
+import sys
 
+# supress .pyc files
+sys.dont_write_bytecode = True
 
 class ProgrammaticError(Exception):
   """Exception raised when method gets called at a wrong time instance.
@@ -23,9 +26,9 @@ class LinearRegression():
 
   def __init__(self):
     self.fitting_done = False
- 
+
   ### fit:
-  ## arguments: 
+  ## arguments:
   # x: np.array of dimensions (n,f). n number of samples, f number of features. containing the data to be fitted. IT NEEDS TO BE TRANSFORMED ALREADY (in case of non-linear curve fits).
   # y: np.array of dimensions (n,)
   def fit(self, x, y):

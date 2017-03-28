@@ -2,6 +2,10 @@ import csv
 import numpy as np
 import pickle as pkl
 import os
+import sys
+
+# supress .pyc files
+sys.dont_write_bytecode = True
 
 class CsvManager():
 
@@ -10,12 +14,12 @@ class CsvManager():
 ## inititializer
 
 ##arguments:
-#directory: string of directory where the csv. file shall be stored or opened. 
+#directory: string of directory where the csv. file shall be stored or opened.
 #           Directory can be either absolute (e.g: C:/User/Documents/......) or relative to working
 #           directory (e.g. data)
   def __init__(self, directory):
     self.directory = directory
-    
+
 
 ## private function, that merges filename with working directory to a filepath. Should not be used publicly.
   def _filepath(self,filename):
@@ -25,7 +29,7 @@ class CsvManager():
 
     return path
 
-###save_to_file: 
+###save_to_file:
 # saves data to .csv file
 
 ## arguments:
@@ -35,7 +39,7 @@ class CsvManager():
 
 ## return value: None
   def save_to_file(self,filename, data, header):
-    
+
     if not (data.shape[1] == header.shape[1] and header.shape[0] == 1):
       raise ValueError("RETARD! Header must be of dimensions (1,n). n is number of columns of data.")
 
@@ -43,14 +47,14 @@ class CsvManager():
     file = open(path, 'wb')
     np.savetxt(file,header, delimiter= ',', fmt ='%s')
     np.savetxt(file,data, delimiter = ',')
-    
-### restore_from file: 
+
+### restore_from file:
 #Gets data saved in a .csv file. The first line of the datasource is skipped.
 
 ## arguments:
-#filename: sting specifying the sourcefile. File needs to be of format .csv. 
+#filename: sting specifying the sourcefile. File needs to be of format .csv.
 
-## return value: 
+## return value:
 # data: np.array containing the content of the file.
   def restore_from_file(self, filename):
     path = self._filepath(filename)
