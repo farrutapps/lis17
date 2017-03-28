@@ -1,3 +1,12 @@
+"""
+Comments Sam:
+- Is ProgrammaticError used? ==> raise ValueError or general helper class?
+- Feature: F(x), w/o y, is it? Solver F(x)*beta = y has to be rewritten as F(x,y)=0
+- dimension discussion: (n,) or (n,1)
+- indent: google or python standard?
+
+"""
+
 import numpy as np
 
 class ProgrammaticError(Exception):
@@ -37,6 +46,7 @@ class LinearRegression:
 
     def predict(self,x):
         if not self.fitting_done:
+            # raise Value error? 
             raise ProgrammaticError("Before you use the model for query, you have "
                               "to set the feature vector and fit it.")
         return np.dot(x, self.beta)
