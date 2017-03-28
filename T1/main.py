@@ -1,3 +1,10 @@
+"""
+Chrigi: Cross validations
+Sam: change main to class
+Seba: main_class
+
+"""
+
 #TODO names (input_data, input_data_test etc),feature selection, change this to class,
 
 #!/usr/bin/env python
@@ -37,6 +44,9 @@ ids = data_train[:,0].reshape(n_samples,1)
 y_source = data_train[:,1].reshape(n_samples,n_dimensions_y)
 x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 
+
+#CROSS VALIDATION
+
 # Split data into training and validation
 ratio_train_validate = 0.8
 idx_switch = int(n_samples * ratio_train_validate)
@@ -70,6 +80,9 @@ n_samples_test = data_test.shape[0]
 ids_test = data_test[:,0].reshape(n_samples_test,1)
 x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
 x_test_tf = feature_transform(feature_vec,x_test)
+
+
+# End Cross validation
 
 # predict output
 y_test = lm.predict(x_test_tf)

@@ -1,39 +1,21 @@
-"""
-Comments Sam:
-- Feature: F(x), w/o y, is it? Solver F(x)*beta = y has to be rewritten as F(x,y)=0
-
-TODO:
-delete ProgrammaticError
-"""
-
 import numpy as np
-
-class ProgrammaticError(Exception):
-    """Exception raised when method gets called at a wrong time instance.
-
-    Attributes:
-    msg  -- The error message to be displayed.
-    """
-
-    def __init__(self, msg):
-        self.msg = msg
-        print("\033[91mERROR: \x1b[0m {}".format(msg))
 
 class LinearRegression:
     """
     Class for linear regression model.
     """
     # Members
-    # Vector in equation: y = F(x,y) * beta, where F(x,y) is the feature vector.
     beta = None
     fitting_done = False
 
     def __init__(self):
         self.fitting_done = False
+        beta = None
 
     ### fit:
     ## arguments:
-    # x: np.array of dimensions (n,f). n number of samples, f number of features. containing the data to be fitted. IT NEEDS TO BE TRANSFORMED ALREADY (in case of non-linear curve fits).
+    # x: np.array of dimensions (n,f). n number of samples, f number of features. containing the data
+    #    to be fitted. IT NEEDS TO BE TRANSFORMED ALREADY (in case of non-linear curve fits).
     # y: np.array of dimensions (n,)
     def fit(self, x, y):
         if x.shape[0] != y.shape[0]:
@@ -43,16 +25,20 @@ class LinearRegression:
         self.beta = np.dot(np.linalg.pinv(x), y)
         self.fitting_done = True
 
+    ### predict:
+    ## arguments:
+    # x: np.array of dimension (n,f). n number of samples, f number of features. containing the data
+    #    to be fitted. IT NEEDS TO BE TRANSFORMED ALREADY (in case of non-linear curve fits).
     def predict(self,x):
         if not self.fitting_done:
-            # raise Value error?
-            raise ProgrammaticError("Before you use the model for query, you have "
+            raise ValueError("Before you use the model for query, you have "
                               "to set the feature vector and fit it.")
         return np.dot(x, self.beta)
 
-    ##returns mean squared error
+    # returns mean error
     def validate(self, x_validate, y_validate):
         return np.mean(self.error_function(self.predict(x_validate),y_validate))
 
+    # define quadratic error
     def error_function(self, predictions, target_values):
         return (predictions - target_values)**2
