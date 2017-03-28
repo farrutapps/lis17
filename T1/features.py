@@ -1,9 +1,5 @@
 import numpy as np
 import csv_manager as cm
-import sys
-
-# supress .pyc files
-sys.dont_write_bytecode = True
 
 class Feature:
 

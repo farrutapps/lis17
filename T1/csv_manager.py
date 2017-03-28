@@ -2,10 +2,7 @@ import csv
 import numpy as np
 import pickle as pkl
 import os
-import sys
 
-# supress .pyc files
-sys.dont_write_bytecode = True
 
 class CsvManager():
 
@@ -19,6 +16,7 @@ class CsvManager():
 #           directory (e.g. data)
   def __init__(self, directory):
     self.directory = directory
+
 
 
 ## private function, that merges filename with working directory to a filepath. Should not be used publicly.

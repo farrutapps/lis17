@@ -6,15 +6,11 @@ import csv_manager
 from features import Feature
 import lin_reg
 import matplotlib.pyplot as plt
-import sys
 
 # Remove lapack warning on OSX (https://github.com/scipy/scipy/issues/5998).
 import warnings
 warnings.filterwarnings(action="ignore", module="scipy",
                         message="^internal gelsd")
-# supress .pyc files
-sys.dont_write_bytecode = True
-
 
 # computes feature matrix
 def feature_transform(feature_vec, x):
