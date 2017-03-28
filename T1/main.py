@@ -61,6 +61,7 @@ feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')
 # Transform samples
 x_train_tf = feature_transform(feature_vec,x_train)
 x_validate_tf = feature_transform(feature_vec,x_validate)
+print("x_train_tf.shape = {}".format(x_train_tf.shape))
 
 # Linear Regression
 lm = lin_reg.LinearRegression()
