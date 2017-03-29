@@ -72,6 +72,11 @@ for i in range(n_dimensions_x):
     for j in range(n_dimensions_x):
         feature_vec.append( Feature(np.array([i,j]),'multiply') )
 
+# exponential function and logarithmic function
+for i in range(n_dimensions_x):
+    feature_vec.append( Feature(np.array([i]),'exp') )
+    # feature_vec.append( Feature(np.array([i]),'log')  # why is log not working?
+
 
 # feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')] ## TODO: Select model
 
@@ -87,9 +92,11 @@ lm.fit(x_train_tf, y_train)
 
 # Validation
 rmse = lm.validate(x_validate_tf, y_validate)**0.5
+print('# of datapoints used for fitting: {}'.format(n_samples))
+print('# of features: {}'.format(len(feature_vec)) )
 print('RMSE: {}'.format(rmse))
-print(' ')
-print('feature weights \n{}'.format(lm.beta))
+# print(' ')
+# print('feature weights \n{}'.format(lm.beta))
 
 # End Cross validation
 
