@@ -12,27 +12,28 @@ class CrossValidation():
     #split_data:    #list created by private function _split() containing arrays of separated test data
     #validation_error:    #list containing rms error of individual folds
     def __init__(self,data,k):
-        if not k > 1:
-            raise ValueError("the number of folds for the cross-validation has to be at least 2")
+        if not (k > 1 and k<=data.shape[0]):
+            raise ValueError("the number of folds for the cross-validation has to be between 2 and the number of samples")
         self.data = data
         self.k = k
         self.split_data = self._split()
-        self.validation_error = [None]*self.k
-
+        self.validation_error = np.empty(self.k)
 
 ##private function to split the data, returns list with splits
     def _split(self):
-        split_length = int(np.round(len(self.data[:,0]) / self.k))
-        split_data = [None]*self.k
+        split_length = int(np.round(self.data.shape[0]) / self.k)
+        split_data = np.empty(shape=(self.k,),dtype = object)
         for i in range(self.k):        
-            if i!=(self.k-1): split_data[i] = self.data[i*split_length:(i+1)*split_length,:]
-            else: split_data[i] = self.data[i*split_length:,:]
-        return split_data
-        
+            if i!=(self.k-1): 
+                split_data[i] = self.data[i*split_length:(i+1)*split_length,:]
+            else: 
+                split_data[i] = self.data[i*split_length:,:]
+        return split_data     
         
 ## public function to start cross-validation-function
 ## arguments:
     #model:   applied model to achieve fitting
+## returns: average validation error
     def start_cross_validation(self, model):
         
         for i in range(self.k):
@@ -47,11 +48,13 @@ class CrossValidation():
              
             x_train = train_data[:,2:]
             y_train = train_data[:,1]
-            x_validate = self.split_data[i][:,2:]
-            y_validate = self.split_data[i][:,1]
+            x_validate = np.array(self.split_data[i][:,2:])
+            y_validate = np.array(self.split_data[i][:,1])
 
             model.fit(x_train,y_train)
             self.validation_error[i] = model.validate(x_validate,y_validate)**0.5
                  
         return np.average(self.validation_error)
+
+
     
