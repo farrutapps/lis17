@@ -1,10 +1,3 @@
-"""
-Chrigi: Cross validations
-Sam: change main to class
-Seba: main_class
-
-"""
-
 #TODO names (input_data, input_data_test etc),feature selection, change this to class,
 
 #!/usr/bin/env python
@@ -19,7 +12,14 @@ import warnings
 warnings.filterwarnings(action="ignore", module="scipy",
                         message="^internal gelsd")
 
-# computes feature matrix
+"""
+Methods
+"""
+### transforms data into feature matrix st. non-linear features can be computed using linear regression
+## arguments:
+#   x, np.array of dimension (n,), n number of samples
+# outputs:
+#   x_tf, np.array of dimension (n, f), n number of samples, f number of features.
 def feature_transform(feature_vec, x):
     n_features = len(feature_vec)
     n_samples = x.shape[0]
@@ -31,6 +31,10 @@ def feature_transform(feature_vec, x):
 
     return x_tf
 
+
+"""
+Find model and corresponding coefficients beta
+"""
 # loading training data
 data_loader = csv_manager.CsvManager('data')
 data_train = data_loader.restore_from_file('train.csv')
@@ -75,15 +79,18 @@ print('RMSE: {}'.format(rmse))
 print(' ')
 print('feature weights \n{}'.format(lm.beta))
 
+# End Cross validation
+
+
+"""
+Predict output with chosen features and learned coefficients beta
+"""
 # load test data and transform samples
 data_test = data_loader.restore_from_file('test.csv')
 n_samples_test = data_test.shape[0]
 ids_test = data_test[:,0].reshape(n_samples_test,1)
 x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
 x_test_tf = feature_transform(feature_vec,x_test)
-
-
-# End Cross validation
 
 # predict output
 y_test = lm.predict(x_test_tf)
