@@ -60,12 +60,24 @@ x_validate = x_source[idx_switch:, :]
 y_validate = y_source[idx_switch:, :]
 
 #Feature Vector
-feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')] ## TODO: Select model
+# constant
+feature_vec = [Feature(np.array([]),'multiply')]
+
+# first order monomials: linear (additional features: 15, total 16)
+for i in range(n_dimensions_x):
+    feature_vec.append( Feature(np.array([i]),'multiply') )
+
+# second order monomials: quadratic (additional features: 15*15 = 225, total 241)
+for i in range(n_dimensions_x):
+    for j in range(n_dimensions_x):
+        feature_vec.append( Feature(np.array([i,j]),'multiply') )
+
+
+# feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')] ## TODO: Select model
 
 # Transform samples
 x_train_tf = feature_transform(feature_vec,x_train)
 x_validate_tf = feature_transform(feature_vec,x_validate)
-print("x_train_tf.shape = {}".format(x_train_tf.shape))
 
 # Linear Regression
 lm = lin_reg.LinearRegression()
