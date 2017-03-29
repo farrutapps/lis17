@@ -20,7 +20,7 @@ class CrossValidation():
 
 ##private function to split the data, returns list with splits
     def _split(self):
-        split_length = int(np.floor(len(self.data[:,0]) / self.k))
+        split_length = int(np.round(len(self.data[:,0]) / self.k))
         split_data = [None]*self.k
         for i in range(self.k):        
             if i!=(self.k-1): split_data[i] = self.data[i*split_length:(i+1)*split_length,:]
@@ -39,12 +39,12 @@ class CrossValidation():
             for j in range(self.k):
                 if i != j:
                     if (i==0 and j==1) or (i!=0 and j==0):
-                        predict_data = self.split_data[j]
+                        train_data = self.split_data[j]
                     else:
-                        predict_data = np.vstack([predict_data,self.split_data[j]])
+                        train_data = np.vstack([train_data,self.split_data[j]])
              
-            x_train = predict_data[:,2:]
-            y_train = predict_data[:,1]
+            x_train = train_data[:,2:]
+            y_train = train_data[:,1]
             x_validate = self.split_data[i][:,2:]
             y_validate = self.split_data[i][:,1]
 
