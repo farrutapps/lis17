@@ -8,15 +8,15 @@ class Feature:
 	# x_column_index: array listing the indices of the data points that shall be multiplied
 	# method name: name of the method that shall be applied to the data on evaluation. Must be listed in the method register_methods.
 	def __init__(self, x_column_index, method_name):
-		
+
 		self._register_methods()
 		self.x_column_index = x_column_index.reshape(max(x_column_index.shape))
-		self.method_name = method_name	
+		self.method_name = method_name
 
-	## Private method. do not use from outside the class. 
+	## Private method. do not use from outside the class.
 	# Used to initialize the list of feature models.
 	def _register_methods(self):
-		
+
 		# NOTE: the keys of the dictionaries are strings. If necessary to iterate through the entries of the dicitonary, use function dict.keys() to obtain a list.
 		self.methods = {}
 
@@ -26,18 +26,18 @@ class Feature:
 
 	### evaluate:
 	## arguments:
-	# x: np.array with one dimension = 1. The data it contains will be evaluated corresponding to the indexes and method_name specified when initilializing the class. 
+	# x: np.array with one dimension = 1. The data it contains will be evaluated corresponding to the indexes and method_name specified when initilializing the class.
 	def evaluate(self, x):
-		return self.methods[self.method_name](x, self.x_column_index) 
+		return self.methods[self.method_name](x, self.x_column_index)
 
 	### multiply:
 	# multiplies the elements of data specified by the indexes in x_column_index.
 	#
-	## arguments: 
-	# x: np.array with one dimension = 1. 
+	## arguments:
+	# x: np.array with one dimension = 1.
 	# x_column_index: array listing the ids of the data points that shall be multiplied
 	#
-	## return value: 
+	## return value:
 	# result of the multiplication
 	def multiply(self,x, x_column_index):
 		result = 1
