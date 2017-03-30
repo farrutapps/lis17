@@ -56,5 +56,22 @@ class CrossValidation():
                  
         return np.average(self.validation_error)
 
+    def start_single_validation(self, model):
+        i = int(np.random.uniform(0,self.k))
+
+        train_data = np.vstack(self.split_data[:])
+        np.delete(train_data, i)
+
+        x_train = train_data[:,2:]
+        y_train = train_data[:,1]
+        x_validate = np.array(self.split_data[i][:,2:])
+        y_validate = np.array(self.split_data[i][:,1])
+
+        model.fit(x_train,y_train)
+        self.validation_error = model.validate(x_validate,y_validate)**0.5
+
+        return self.validation_error
+
+
 
     
