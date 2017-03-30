@@ -24,3 +24,6 @@ class RidgeRegression():
 	def error_function(self, predictions, target_values):
 		return (predictions - target_values)**2	
 
+	def predict(self,x):
+		return self.ridge.predict()
+
