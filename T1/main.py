@@ -4,8 +4,10 @@
 import numpy as np
 import csv_manager
 from features import Feature
-import lin_reg
+import lin_reg as lr
+import ridge_reg as rr
 import matplotlib.pyplot as plt
+import cross_validation as cv
 
 # Remove lapack warning on OSX (https://github.com/scipy/scipy/issues/5998).
 import warnings
@@ -49,54 +51,57 @@ y_source = data_train[:,1].reshape(n_samples,n_dimensions_y)
 x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 
 
-#CROSS VALIDATION
+#####Feature transform
+constant = True
+first = True
+second = True
+exponential = False
 
-# Split data into training and validation
-ratio_train_validate = 0.8
-idx_switch = int(n_samples * ratio_train_validate)
-x_train = x_source[:idx_switch, :]
-y_train = y_source[:idx_switch, :]
-x_validate = x_source[idx_switch:, :]
-y_validate = y_source[idx_switch:, :]
+feature_vec = []
 
-#Feature Vector
 # constant
-feature_vec = [Feature(np.array([]),'multiply')]
+if constant:
+    feature_vec = [Feature(np.array([]),'multiply')]
 
 # first order monomials: linear (additional features: 15, total 16)
-for i in range(n_dimensions_x):
-    feature_vec.append( Feature(np.array([i]),'multiply') )
 
-# second order monomials: quadratic (additional features: 15*15 = 225, total 241)
-for i in range(n_dimensions_x):
-    for j in range(n_dimensions_x):
-        feature_vec.append( Feature(np.array([i,j]),'multiply') )
+if first:
+    for i in range(n_dimensions_x):
+        feature_vec.append( Feature(np.array([i]),'multiply') )
 
-# exponential function and logarithmic function
-for i in range(n_dimensions_x):
-    feature_vec.append( Feature(np.array([i]),'exp') )
-    # feature_vec.append( Feature(np.array([i]),'log')  # why is log not working?
+if second:
+    # second order monomials: quadratic (additional features: 15*15 = 225, total 241)
+    for i in range(n_dimensions_x):
+        for j in range(n_dimensions_x):
+            feature_vec.append( Feature(np.array([i,j]),'multiply') )
 
-
-# feature_vec = [Feature(np.array([0,0]),'multiply'),Feature(np.array([14]),'exp')] ## TODO: Select model
+if exponential:
+    # exponential function and logarithmic function
+    for i in range(n_dimensions_x):
+        feature_vec.append( Feature(np.array([i]),'exp') )
+        # feature_vec.append( Feature(np.array([i]),'log')  # why is log not working?
 
 # Transform samples
-x_train_tf = feature_transform(feature_vec,x_train)
-x_validate_tf = feature_transform(feature_vec,x_validate)
+if constant or first or second or exponential:
+    x_source_tf = feature_transform(feature_vec,x_source)
 
-# Linear Regression
-lm = lin_reg.LinearRegression()
+else:
+    x_source_tf = x_source
 
-# Compute feature matrix
-lm.fit(x_train_tf, y_train)
+data_cv = np.hstack((ids,y_source,x_source_tf))
 
-# Validation
-rmse = lm.validate(x_validate_tf, y_validate)**0.5
-print('# of datapoints used for fitting: {}'.format(n_samples))
-print('# of features: {}'.format(len(feature_vec)) )
-print('RMSE: {}'.format(rmse))
-# print(' ')
-# print('feature weights \n{}'.format(lm.beta))
+cross_validation = cv.CrossValidation(data_cv,800)
+
+lin_reg = lr.LinearRegression()
+ridge_reg = rr.RidgeRegression(1)
+
+print data_cv.shape
+
+rmse = cross_validation.start_cross_validation(ridge_reg)
+#print 'number of features: {}'.format(len(lin_reg.beta))
+
+print rmse
+
 
 # End Cross validation
 
@@ -104,17 +109,17 @@ print('RMSE: {}'.format(rmse))
 """
 Predict output with chosen features and learned coefficients beta
 """
-# load test data and transform samples
-data_test = data_loader.restore_from_file('test.csv')
-n_samples_test = data_test.shape[0]
-ids_test = data_test[:,0].reshape(n_samples_test,1)
-x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
-x_test_tf = feature_transform(feature_vec,x_test)
+# # load test data and transform samples
+# data_test = data_loader.restore_from_file('test.csv')
+# n_samples_test = data_test.shape[0]
+# ids_test = data_test[:,0].reshape(n_samples_test,1)
+# x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
+# x_test_tf = feature_transform(feature_vec,x_test)
 
-# predict output
-y_test = lm.predict(x_test_tf)
+# # predict output
+# y_test = lm.predict(x_test_tf)
 
-#save output
-header = np.array(['id','y']).reshape(1,2)
-dump_data = np.hstack((ids_test,y_test))
-data_loader.save_to_file('results.csv',dump_data,header)
+# #save output
+# header = np.array(['id','y']).reshape(1,2)
+# dump_data = np.hstack((ids_test,y_test))
+# data_loader.save_to_file('results.csv',dump_data,header)
