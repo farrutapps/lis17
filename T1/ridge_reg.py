@@ -25,5 +25,5 @@ class RidgeRegression():
 		return (predictions - target_values)**2	
 
 	def predict(self,x):
-		return self.ridge.predict()
+		return self.ridge.predict(x)
 
