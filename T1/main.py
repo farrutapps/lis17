@@ -53,9 +53,9 @@ x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 
 #####Feature transform
 constant = True
-first = True
+first = False
 second = False
-exponential = False
+exponential = True
 
 
 ### greedy forward feature selection
@@ -80,7 +80,7 @@ if exponential:
     for i in range(n_dimensions_x):
         feature_vec_pool.append( Feature(np.array([i]),'exp') )
 
-K = 5 # select K most promising features
+K = 2 # select K most promising features
 RMSE = np.zeros(K)
 for k in range(K):
     print("Selecting feature {} \t(status: {} %) ".format(k,round(100*float(k)/float(K),1)))
@@ -105,7 +105,10 @@ for k in range(K):
 
     # take most promising feature: add to feature_vec and delete it from feature_vec_pool
     idx_min = np.argmin(rmse)
+    # print feature_vec
     feature_vec.append(feature_vec_pool[idx_min])
+    # print feature_vec
+
     del feature_vec_pool[idx_min]
     RMSE[k] = rmse[idx_min]
     print("\tRMSE = {}".format(RMSE[k]))
