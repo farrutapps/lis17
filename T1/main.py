@@ -55,49 +55,78 @@ x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 constant = True
 first = True
 second = True
-exponential = False
+exponential = True
 
+
+### greedy forward feature selection
+# feature_vec_pool contains all possible features
+# feature_vec contains approved features
+feature_vec_pool = []
 feature_vec = []
 
 if constant:
-    feature_vec = [Feature(np.array([]),'multiply')]
+    feature_vec_pool = [Feature(np.array([]),'multiply')]
 
 if first:
     for i in range(n_dimensions_x):
-        feature_vec.append( Feature(np.array([i]),'multiply') )
+        feature_vec_pool.append( Feature(np.array([i]),'multiply') )
 
 if second:
     for i in range(n_dimensions_x):
         for j in range(n_dimensions_x):
-            feature_vec.append( Feature(np.array([i,j]),'multiply') )
+            feature_vec_pool.append( Feature(np.array([i,j]),'multiply') )
 
 if exponential:
     for i in range(n_dimensions_x):
-        feature_vec.append( Feature(np.array([i]),'exp') )
+        feature_vec_pool.append( Feature(np.array([i]),'exp') )
 
+K = 100 # select K most promising features
+RMSE = np.zeros(K)
+for k in range(K):
+    print("Selecting feature {} \t({}%) ".format(k,round(100*float(k)/float(K),1)))
+    # select feature from feature_vec_pool with smalles RMSE and stack it to feature_vec
+    rmse = np.zeros( len(feature_vec_pool) )
+    for i in range( len(feature_vec_pool) ):
+        feature_i = []
+        feature_i.append( feature_vec_pool[i] )
+        # Transform samples
+        if constant or first or second or exponential:
+            x_source_tf = feature_transform(feature_i,x_source)
 
-# Transform samples
-if constant or first or second or exponential:
-    x_source_tf = feature_transform(feature_vec,x_source)
+        else:
+            x_source_tf = x_source
 
-else:
-    x_source_tf = x_source
+        data_cv = np.hstack((ids,y_source,x_source_tf))
+        cross_validation = cv.CrossValidation(data_cv,5)
+        lin_reg = lr.LinearRegression()
+        # rmse[i] = cross_validation.start_single_validation(lin_reg)
+        rmse[i] = cross_validation.start_cross_validation(lin_reg)
+        # print("\tfeature {}: \tRMSE = {}".format(i,rmse[i]))
 
-data_cv = np.hstack((ids,y_source,x_source_tf))
+    # take most promising feature: add to feature_vec and delete it from feature_vec_pool
+    idx_min = np.argmin(rmse)
+    feature_vec.append(feature_vec_pool[i])
+    del feature_vec_pool[idx_min]
 
-cross_validation = cv.CrossValidation(data_cv,n_samples)
+    if constant or first or second or exponential:
+        x_source_tf = feature_transform(feature_vec,x_source)
 
-lin_reg = lr.LinearRegression()
-ridge_reg = rr.RidgeRegression(1)
+    else:
+        x_source_tf = x_source
 
-# print data_cv.shape
+    data_cv = np.hstack((ids,y_source,x_source_tf))
+    cross_validation = cv.CrossValidation(data_cv,10)
+    lin_reg = lr.LinearRegression()
+    RMSE[k] = cross_validation.start_cross_validation(lin_reg)
+    # print("\tRMSE = {}".format(RMSE[k]))
 
-print "Start calculation cross validation..."
-rmse = cross_validation.start_cross_validation(ridge_reg)
-# print 'number of features: {}'.format(len(ridge_reg.beta))
-
-print rmse
-# print "Done!"
+plot_err_vs_features = True
+if plot_err_vs_features:
+    plt.figure()
+    plt.plot(range(K),RMSE)
+    plt.xlabel('number of features')
+    plt.ylabel('RMSE (CV, k=10)')
+    plt.show(block=True)
 
 
 """
@@ -108,7 +137,7 @@ Predict output with chosen features and learned coefficients beta
 # n_samples_test = data_test.shape[0]
 # ids_test = data_test[:,0].reshape(n_samples_test,1)
 # x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
-# x_test_tf = feature_transform(feature_vec,x_test)
+# x_test_tf = feature_transform(feature_vec_pool,x_test)
 
 # # predict output
 # y_test = lm.predict(x_test_tf)
