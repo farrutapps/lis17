@@ -2,7 +2,12 @@ import numpy as np
 
 class ScikitRegression():
 	""
-	#This class implements the sklearn tool Ridge Regression in a way that it works with the class CrossValidation.
+	# This class serves as a interface between the CrossValidation class and a lot of regression solvers form the scikit sklearn library.
+
+	## USAGE:
+	# 1) initialize scikit solver, such as sklearn.linear_model.Ridge with desired parameters.
+	# 2) Give the instance of the solver from 1) as an argument to this class.
+	# 3) Hand the instance of this class to the CrossValidation class.
 	""
 
 	scikit_solver = None
