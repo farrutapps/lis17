@@ -63,7 +63,7 @@ class CrossValidation():
         i = int(np.random.uniform(0,self.k))
 
         train_data = np.vstack(self.split_data[:])
-        train_data = np.delete(train_data, i)
+        train_data = np.delete(train_data, i,0)
 
         x_train = train_data[:,2:]
         y_train = train_data[:,1]
