@@ -57,4 +57,23 @@ class CrossValidation():
         return np.average(self.validation_error)
 
 
+## This function randomly chooses one of the split_data sets. It trains the model on all but the chosen one, which is used to validate the data.
+## It does this just once. For high k this is much faster than start_cross_validation but also has a worse estimation of the validation_error.
+    def start_single_validation(self, model):
+        i = int(np.random.uniform(0,self.k))
+
+        train_data = np.vstack(self.split_data[:])
+        train_data = np.delete(train_data, i,0)
+
+        x_train = train_data[:,2:]
+        y_train = train_data[:,1]
+        x_validate = np.array(self.split_data[i][:,2:])
+        y_validate = np.array(self.split_data[i][:,1])
+
+        model.fit(x_train,y_train)
+        self.validation_error = model.validate(x_validate,y_validate)**0.5
+
+        return self.validation_error
+
+
     
