@@ -137,6 +137,6 @@ Predict output with chosen features and learned coefficients beta
 # y_test = lm.predict(x_test_tf)
 
 # #save output
-# header = np.array(['id','y']).reshape(1,2)
+# header = np.array(['Id','y']).reshape(1,2)
 # dump_data = np.hstack((ids_test,y_test))
 # data_loader.save_to_file('results.csv',dump_data,header)
