@@ -59,27 +59,22 @@ exponential = False
 
 feature_vec = []
 
-# constant
 if constant:
     feature_vec = [Feature(np.array([]),'multiply')]
-
-# first order monomials: linear (additional features: 15, total 16)
 
 if first:
     for i in range(n_dimensions_x):
         feature_vec.append( Feature(np.array([i]),'multiply') )
 
 if second:
-    # second order monomials: quadratic (additional features: 15*15 = 225, total 241)
     for i in range(n_dimensions_x):
         for j in range(n_dimensions_x):
             feature_vec.append( Feature(np.array([i,j]),'multiply') )
 
 if exponential:
-    # exponential function and logarithmic function
     for i in range(n_dimensions_x):
         feature_vec.append( Feature(np.array([i]),'exp') )
-        # feature_vec.append( Feature(np.array([i]),'log')  # why is log not working?
+
 
 # Transform samples
 if constant or first or second or exponential:
@@ -90,20 +85,19 @@ else:
 
 data_cv = np.hstack((ids,y_source,x_source_tf))
 
-cross_validation = cv.CrossValidation(data_cv,800)
+cross_validation = cv.CrossValidation(data_cv,n_samples)
 
 lin_reg = lr.LinearRegression()
 ridge_reg = rr.RidgeRegression(1)
 
-print data_cv.shape
+# print data_cv.shape
 
+print "Start calculation cross validation..."
 rmse = cross_validation.start_cross_validation(ridge_reg)
-#print 'number of features: {}'.format(len(lin_reg.beta))
+# print 'number of features: {}'.format(len(ridge_reg.beta))
 
 print rmse
-
-
-# End Cross validation
+# print "Done!"
 
 
 """
