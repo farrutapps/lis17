@@ -7,6 +7,7 @@ from features import Feature
 import scikit_regression as sci_reg
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import Lasso
+import os
 
 import cross_validation as cv
 
@@ -133,7 +134,7 @@ if transform:
     if constant or first or second or third or exponential:
         print 'transform features'
 
-        if constant and first and second and third and not exponential:
+        if constant and first and second and third and not exponential and os.path.isfile('data/up_to_three.csv'):
             print 'load transform from file'
             # data_loader.save_to_file('up_to_three.csv',np.hstack((y_source,x_source_tf)),np.array(['h']*(x_source_tf.shape[1]+1)).reshape(1,x_source_tf.shape[1]+1))
             source_tf = data_loader.restore_from_file('up_to_three.csv')
