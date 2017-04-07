@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 import csv_manager
 from features import Feature
@@ -54,7 +55,7 @@ transform = True
 constant = True
 first = True
 second = True
-third = False
+third = True
 exponential = False
 
 feature_vec = []
@@ -111,14 +112,14 @@ else:
 
 
 
-if True:
+if False:
     print "starting crossvaldation to evaluate k_neighbors for classification..."
     k_neighbors_arr = np.arange(2,20,2)
 
     for k_neighbors in k_neighbors_arr:
 
         data_cv = np.hstack((ids,y_source,x_source_tf))
-        cross_validation = cv.CrossValidation(data_cv,n_samples/10)
+        cross_validation = cv.CrossValidation(data_cv,10)
         k_nn = knn.kNearestNeighbor(k_neighbors)
         acc = cross_validation.start_cross_validation(k_nn)
         print("k_neighbors = {}: \taccuracy = {}".format(k_neighbors,acc))
@@ -128,18 +129,19 @@ if True:
 Predict output using k nearest neighbors
 """
 # crossvalidaiotn shows that k_neighbors = 6 is a good choice
-k_neighbors = 18
+k_neighbors = 6
 clf = knn.kNearestNeighbor(k_neighbors)
-clf.fit(x_source, y_source.ravel())
+clf.fit(x_source_tf, y_source.ravel())
 
 # load test data and transform samples
 data_test = data_loader.restore_from_file('test.csv')
 n_samples_test = data_test.shape[0]
 ids_test = data_test[:,0].reshape(n_samples_test,1)
 x_test = data_test[:,1:].reshape(n_samples_test,n_dimensions_x)
+x_test_tf = feature_transform(feature_vec, x_test)
 
 # predict output
-y_test = clf.predict(x_test).reshape(n_samples_test,1)
+y_test = clf.predict(x_test_tf).reshape(n_samples_test,1)
 
 #save output
 header = np.array(['Id','y']).reshape(1,2)
