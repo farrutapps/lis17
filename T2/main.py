@@ -36,7 +36,6 @@ clf = knn.kNearestNeighbor(k_neighbors)
 clf.fit(x_source, y_source)
 
 
-
 """
 Predict output with chosen features and learned coefficients beta
 """
