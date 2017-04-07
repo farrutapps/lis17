@@ -32,7 +32,7 @@ x_source = data_train[:,n_dimensions_y+1:].reshape(n_samples,n_dimensions_x)
 
 if False:
     print "starting crossvaldation to evaluate k_neighbors for classification..."
-    k_neighbors_arr = np.arange(20,30,1)
+    k_neighbors_arr = np.arange(30,40,1)
 
     for k_neighbors in k_neighbors_arr:
 
@@ -47,7 +47,7 @@ if False:
 Predict output using k nearest neighbors
 """
 # crossvalidaiotn shows that k_neighbors = 6 is a good choice
-k_neighbors = 6
+k_neighbors = 18
 clf = knn.kNearestNeighbor(k_neighbors)
 clf.fit(x_source, y_source.ravel())
 
