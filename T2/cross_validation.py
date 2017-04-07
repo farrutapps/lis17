@@ -10,7 +10,7 @@ class CrossValidation():
     #k:       number of data packages which should be used for the cross validation. k has to be an integer > 1
 ## public variables:
     #split_data:    #list created by private function _split() containing arrays of separated test data
-    #validation_error:    #list containing rms error of individual folds
+    #validation_error:    #list containing error of individual folds
     def __init__(self,data,k):
         if not (k > 1 and k<=data.shape[0]):
             raise ValueError("the number of folds for the cross-validation has to be between 2 and the number of samples")
@@ -52,7 +52,7 @@ class CrossValidation():
             y_validate = np.array(self.split_data[i][:,1])
 
             model.fit(x_train,y_train)
-            self.validation_error[i] = model.validate(x_validate,y_validate)**0.5
+            self.validation_error[i] = model.validate(x_validate,y_validate)
 
         return np.average(self.validation_error)
 
@@ -71,6 +71,6 @@ class CrossValidation():
         y_validate = np.array(self.split_data[i][:,1])
 
         model.fit(x_train,y_train)
-        self.validation_error = model.validate(x_validate,y_validate)**0.5
+        self.validation_error = model.validate(x_validate,y_validate)
 
         return self.validation_error
