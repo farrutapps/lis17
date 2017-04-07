@@ -23,21 +23,21 @@ class CrossValidation():
     def _split(self):
         split_length = int(np.round(self.data.shape[0]) / self.k)
         split_data = np.empty(shape=(self.k,),dtype = object)
-        for i in range(self.k):        
-            if i!=(self.k-1): 
+        for i in range(self.k):
+            if i!=(self.k-1):
                 split_data[i] = self.data[i*split_length:(i+1)*split_length,:]
-            else: 
+            else:
                 split_data[i] = self.data[i*split_length:,:]
-        return split_data     
-        
+        return split_data
+
 ## public function to start cross-validation-function
 ## arguments:
     #model:   applied model to achieve fitting
 ## returns: average validation error
     def start_cross_validation(self, model):
-        
+
         for i in range(self.k):
-            
+
             #combine list elements from split_data[j] where j != i
             for j in range(self.k):
                 if i != j:
@@ -45,7 +45,7 @@ class CrossValidation():
                         train_data = self.split_data[j]
                     else:
                         train_data = np.vstack([train_data,self.split_data[j]])
-             
+
             x_train = train_data[:,2:]
             y_train = train_data[:,1]
             x_validate = np.array(self.split_data[i][:,2:])
@@ -53,7 +53,7 @@ class CrossValidation():
 
             model.fit(x_train,y_train)
             self.validation_error[i] = model.validate(x_validate,y_validate)**0.5
-                 
+
         return np.average(self.validation_error)
 
 
@@ -74,6 +74,3 @@ class CrossValidation():
         self.validation_error = model.validate(x_validate,y_validate)**0.5
 
         return self.validation_error
-
-
-    

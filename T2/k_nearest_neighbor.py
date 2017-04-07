@@ -28,13 +28,13 @@ class kNearestNeighbor():
 		return self.classification.predict(x)
 
 
-### Testing Sam
-x = np.array([[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2]])
-y = np.array([1,1,1,0,1,1,0,0,1])
-x_pred = np.array([[1.5,0.5],[0.5,1.5]])
-y_pred = clf.predict(x_pred)
-
-clf = kNearestNeighbor(4)
-clf.fit(x,y)
-
-print y_pred
+# ### Testing Sam
+# x = np.array([[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2]])
+# y = np.array([1,1,1,0,1,1,0,0,1])
+# x_pred = np.array([[1.5,0.5],[0.5,1.5]])
+#
+# clf = kNearestNeighbor(4)
+# clf.fit(x,y)
+# y_pred = clf.predict(x_pred)
+#
+# print y_pred
