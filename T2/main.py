@@ -1,8 +1,11 @@
 import numpy as np
 import csv_manager
 from features import Feature
-import scikit_regression as sci_holder
+import scikit_model as sci_holder
 from sklearn.linear_model import SGDClassifier
+from sklearn import svm
+from sklearn import preprocessing
+from sklearn.neural_network import MLPClassifier
 import os
 
 import cross_validation as cv
@@ -11,6 +14,7 @@ import cross_validation as cv
 class Parameter():
     def __init__(self, alpha):
         self.alpha = alpha
+        self.accuracy = None
 
 """
 Methods
@@ -91,10 +95,10 @@ x_source = data_train[:, n_dimensions_y + 1:].reshape(n_samples, n_dimensions_x)
 
 
 # compute feature vector
-feature_vec = compute_feature_vec([0,1,2,3])
+feature_vec = compute_feature_vec([])
 
 # if feature_vec not empty, do transform.
-if not feature_vec:
+if feature_vec:
     print 'transform features'
     transformed = True
     x_source_tf = feature_transform(feature_vec, x_source)
@@ -102,6 +106,13 @@ if not feature_vec:
 else:
     x_source_tf = x_source
     transformed = False
+
+
+# Scale data
+scale_data = True
+if scale_data:
+    print 'scale data'
+    x_source_tf = preprocessing.scale(x_source_tf)
 
 # Cross validation
 data_cv = np.hstack((ids, y_source, x_source_tf))
@@ -111,23 +122,31 @@ cross_validate = False
 
 if cross_validate:
     print 'Doing Cross Validation'
-    classifier = SGDClassifier()
+    scale = 0.5
 
-    solver = sci_holder.ScikitRegression(classifier)
-    rmse = cross_validation.start_cross_validation(solver)
-    print rmse
+    results = []
+    n_steps = 100
+    for i in range(n_steps):
+        print 'progress: {}/{}'.format(i, n_steps)
 
-    # results = []
-    #
-    # find best result
-    # best = [p_best for p_best in results if p_best.rmse == min([p.rmse for p in results])]
-    # best = best[0]
-    # print 'best rmse: {} alpha = {}'.format(best.rmse, best.alpha)
-    #
-    # # count zero entries
-    # print best.coef
-    # number_non_zero = np.linalg.norm(best.coef, 0)
-    # print 'number of non zero entires {}/{}'.format(number_non_zero, best.coef.shape[0])
+        param = Parameter((i+1)*scale)
+        classifier = MLPClassifier(solver='lbfgs', alpha=param.alpha)
+
+        solver = sci_holder.ScikitModel(classifier)
+        param.accuracy = cross_validation.start_cross_validation(solver)
+        results.append(param)
+
+        print 'score: alpha {}, accuracy: {}'.format(param.alpha,param.accuracy)
+
+
+    #find best result
+    accuracies = [p.accuracy for p in results]
+    best = [p for p in results if p.accuracy == max(accuracies)]
+    print best
+    best = best[0]
+    print 'best accuracy: {} alpha = {}'.format(best.accuracy, best.alpha)
+    print 'standard deviation of results: {}'.format(np.std(accuracies))
+
 
 
 # End Cross validation
@@ -138,7 +157,7 @@ else:
     """
     print 'Making test prediction'
 
-    classifier = SGDClassifier()
+    classifier = MLPClassifier(solver='lbfgs', alpha=5.5)
     classifier.fit(x_source_tf, y_source.reshape(n_samples))
 
     # load test data and transform samples
@@ -150,7 +169,13 @@ else:
 
     # predict output
     if transformed:
+        print 'transform data'
         x_test_tf = feature_transform(feature_vec, x_test)
+        y_test = classifier.predict(x_test_tf).reshape(n_samples_test, 1)
+
+    elif scale_data:
+        print 'scale data'
+        x_test_tf = preprocessing.scale(x_test)
         y_test = classifier.predict(x_test_tf).reshape(n_samples_test, 1)
 
     else:
