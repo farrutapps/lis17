@@ -1,8 +1,10 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
 
-class ScikitRegression():
+
+class ScikitModel():
 	""
-	# This class serves as a interface between the CrossValidation class and a lot of regression solvers form the scikit sklearn library.
+	# This class serves as a interface between the CrossValidation class and a lot of solvers form the scikit sklearn library.
 
 	## USAGE:
 	# 1) initialize scikit solver, such as sklearn.linear_model.Ridge with desired parameters.
@@ -24,7 +26,7 @@ class ScikitRegression():
 		return np.mean(self.error_function(self.scikit_solver.predict(x),y))
 
 	def error_function(self, predictions, target_values):
-		return (predictions - target_values)**2
+		return accuracy_score(target_values, predictions)
 
 	def predict(self,x):
 		return self.scikit_solver.predict(x)
