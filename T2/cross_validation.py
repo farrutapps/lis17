@@ -52,7 +52,7 @@ class CrossValidation():
             y_validate = np.array(self.split_data[i][:,1])
 
             model.fit(x_train,y_train)
-            self.validation_error[i] = model.validate(x_validate,y_validate)**0.5
+            self.validation_error[i] = model.validate(x_validate,y_validate)
                  
         return np.average(self.validation_error)
 
@@ -71,7 +71,7 @@ class CrossValidation():
         y_validate = np.array(self.split_data[i][:,1])
 
         model.fit(x_train,y_train)
-        self.validation_error = model.validate(x_validate,y_validate)**0.5
+        self.validation_error = model.validate(x_validate,y_validate)
 
         return self.validation_error
 

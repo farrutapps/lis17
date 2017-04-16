@@ -1,11 +1,13 @@
 import numpy as np
 import csv_manager
 from features import Feature
+from parameter_manager import ParameterManager
 import scikit_model as sci_holder
 from sklearn.linear_model import SGDClassifier
 from sklearn import svm
 from sklearn import preprocessing
 from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
 import os
 
 import cross_validation as cv
@@ -109,44 +111,44 @@ else:
 
 
 # Scale data
+scaler = StandardScaler()
+
 scale_data = True
 if scale_data:
     print 'scale data'
-    x_source_tf = preprocessing.scale(x_source_tf)
+    scaler.fit(x_source_tf)
+    x_source_tf = scaler.transform(x_source_tf)
 
 # Cross validation
 data_cv = np.hstack((ids, y_source, x_source_tf))
 cross_validation = cv.CrossValidation(data_cv, 5)
 
-cross_validate = False
+cross_validate = True
 
 if cross_validate:
     print 'Doing Cross Validation'
-    scale = 0.5
 
-    results = []
-    n_steps = 100
-    for i in range(n_steps):
-        print 'progress: {}/{}'.format(i, n_steps)
+    param_manager = ParameterManager()
 
-        param = Parameter((i+1)*scale)
-        classifier = MLPClassifier(solver='lbfgs', alpha=param.alpha)
+    myrange = [x/2 for x in range(1, 10)]
+    parameter_settings = [('alpha', myrange), ('layer_size', range(50, 200, 25))]
 
-        solver = sci_holder.ScikitModel(classifier)
-        param.accuracy = cross_validation.start_cross_validation(solver)
-        results.append(param)
+    param_manager.compute_parameter_sets(parameter_settings)
 
-        print 'score: alpha {}, accuracy: {}'.format(param.alpha,param.accuracy)
+    for ps in param_manager.parameter_sets:
+        print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
 
+        classifier = MLPClassifier(solver='lbfgs', alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'])
+
+        holder = sci_holder.ScikitModel(classifier)
+        ps['accuracy'] = cross_validation.start_cross_validation(holder)
 
     #find best result
-    accuracies = [p.accuracy for p in results]
-    best = [p for p in results if p.accuracy == max(accuracies)]
+    accuracies = [p['accuracy'] for p in param_manager.parameter_sets]
+    best = [p for p in param_manager.parameter_sets if p['accuracy'] == max(accuracies)]
     print best
-    best = best[0]
-    print 'best accuracy: {} alpha = {}'.format(best.accuracy, best.alpha)
-    print 'standard deviation of results: {}'.format(np.std(accuracies))
 
+    print 'standard deviation of results: {}'.format(np.std(accuracies))
 
 
 # End Cross validation
@@ -157,7 +159,7 @@ else:
     """
     print 'Making test prediction'
 
-    classifier = MLPClassifier(solver='lbfgs', alpha=5.5)
+    classifier = MLPClassifier(solver='lbfgs', alpha=5.2, hidden_layer_sizes=20)
     classifier.fit(x_source_tf, y_source.reshape(n_samples))
 
     # load test data and transform samples
@@ -171,11 +173,17 @@ else:
     if transformed:
         print 'transform data'
         x_test_tf = feature_transform(feature_vec, x_test)
+
+        if scale_data:
+            print 'scale data'
+            x_test_tf = scaler.transform(x_test_tf)
+
+
         y_test = classifier.predict(x_test_tf).reshape(n_samples_test, 1)
 
     elif scale_data:
         print 'scale data'
-        x_test_tf = preprocessing.scale(x_test)
+        x_test_tf = scaler.transform(x_test)
         y_test = classifier.predict(x_test_tf).reshape(n_samples_test, 1)
 
     else:
