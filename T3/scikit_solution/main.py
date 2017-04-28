@@ -139,7 +139,7 @@ if cross_validate:
 
     # Define parameters here: (parameter_name, [parameter_values])
     parameter_settings = [('alpha', myrange), ('layer_size', [(100,100,100,100,100,100,100,100), (50)]),
-                          ('solver',('lfbgs','adam'))]
+                          ('solver',('lbfgs','adam'))]
 
     # Compute all diferent possible parameter_sets
     param_manager.compute_parameter_sets(parameter_settings)
