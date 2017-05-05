@@ -314,7 +314,7 @@ def main(model='mlp', num_epochs=10):
     test_err = 0
     test_acc = 0
     test_batches = 0
-    for batch in iterate_minibatches(X_test, y_test, 10, shuffle=False):
+    for batch in iterate_minibatches(X_test, , 10, shuffle=False):
         inputs, targets = batch
         err, acc = val_fn(inputs, targets)
         test_err += err

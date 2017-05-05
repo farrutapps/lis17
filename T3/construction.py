@@ -117,8 +117,9 @@ data_train = data_pandas.as_matrix()
 n_samples = data_train.shape[0]
 np.random.shuffle(data_train)
 ids = data_pandas.index.values.reshape(n_samples,1)
-y_source = data_train[:, 0].reshape(n_samples, n_dimensions_y)
+y_source = data_train[:, 0].reshape(n_samples, n_dimensions_y).astype(np.int32)
 x_source = data_train[:, 1:].reshape(n_samples, n_dimensions_x)
+
 
 # Split sourve into training and validation
 idx_switch = int(n_samples * ratio_train_validate)
@@ -126,6 +127,11 @@ x_train = x_source[:idx_switch, :]
 y_train = y_source[:idx_switch, :]
 x_val = x_source[idx_switch:, :]
 y_val = y_source[idx_switch:, :]
+n_samples_train = y_train.shape[0];
+n_samples_val = y_val.shape[0];
+y_train = y_train.reshape(n_samples_train)
+y_val = y_val.reshape(n_samples_val)
+
 
 # prepare Theano vectors for optimization lateron
 input_var = T.matrix('inputs')
@@ -162,7 +168,7 @@ updates = lasagne.updates.nesterov_momentum(
 # here is that we do a deterministic forward pass through the network,
 # disabling dropout layers.
 test_prediction = lasagne.layers.get_output(network, deterministic=True)
-test_loss = lasagne.objectives.multiclass_hinge_loss(test_prediction,
+test_loss = lasagne.objectives.categorical_crossentropy(test_prediction,
                                                         target_var)
 test_loss = test_loss.mean()
 # As a bonus, also create an expression for the classification accuracy:
@@ -176,6 +182,8 @@ train_fn = theano.function([input_var, target_var], loss, updates=updates)
 # Compile a second function computing the validation loss and accuracy:
 val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
+# Compile a third function for prediction the output
+pred_fn = theano.function([input_var], test_prediction)
 
 # Finally, launch the training loop.
 print("Starting training...")
@@ -209,11 +217,12 @@ for epoch in range(num_epochs):
     print("  validation accuracy:\t\t{:.2f} %".format(
         val_acc / val_batches * 100))
 
-# After training, we compute and print the test error:
+
+# After training, we compute and print the val error:
 test_err = 0
 test_acc = 0
 test_batches = 0
-for batch in iterate_minibatches(X_test, y_test, 10, shuffle=False):
+for batch in iterate_minibatches(x_val, y_val, 10, shuffle=False):
     inputs, targets = batch
     err, acc = val_fn(inputs, targets)
     test_err += err
@@ -223,3 +232,25 @@ print("Final results:")
 print("  test loss:\t\t\t{:.6f}".format(test_err / test_batches))
 print("  test accuracy:\t\t{:.2f} %".format(
     test_acc / test_batches * 100))
+
+# get data for testing and predict labels on test set
+data_pandas = pd.read_hdf("data/test.h5", "test")
+data_test = data_pandas.as_matrix()
+n_samples_test = data_test.shape[0]
+ids_test = data_pandas.index.values.reshape(n_samples_test,1)
+x_test = data_test.reshape(n_samples_test, n_dimensions_x)
+
+# y_test = lasagne.layers.get_output(network, x_test)
+# predict_y = theano.function([input_var], lasagne.layers.get_output(network))
+# y_test = predict_y(x_test)
+y_test = pred_fn(x_test)
+# y_test = lasagne.layers.get_output(network, deterministic=True)
+print("x_test = \n{}".format(x_test))
+print("y_test = \n{}".format(y_test))
+print("x_test.shape = {}".format(x_test.shape))
+print("y_test.shape = {}".format(y_test.shape))
+print("y_test[1,1] = {}".format(y_test[1,:]))
+# # save output
+# header = np.array(['Id', 'y']).reshape(1, 2)
+# dump_data = np.hstack((ids_test, y_test))
+# data_loader.save_to_file('results.csv', dump_data, header)
