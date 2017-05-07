@@ -153,7 +153,7 @@ else:
 # Create a loss expression for training, i.e., a scalar objective we want
 # to minimize (for our multi-class problem, it is the cross-entropy loss):
 prediction = lasagne.layers.get_output(network)
-loss = lasagne.objectives.multiclass_hinge_loss(prediction, target_var)
+loss = lasagne.objectives.categorical_crossentropy(prediction, target_var)
 loss = loss.mean()
 # We could add some weight decay as well here, see lasagne.regularization.
 
@@ -168,7 +168,7 @@ updates = lasagne.updates.nesterov_momentum(
 # here is that we do a deterministic forward pass through the network,
 # disabling dropout layers.
 test_prediction = lasagne.layers.get_output(network, deterministic=True)
-test_loss = lasagne.objectives.multiclass_hinge_loss(test_prediction,
+test_loss = lasagne.objectives.categorical_crossentropy(test_prediction,
                                                         target_var)
 test_loss = test_loss.mean()
 # As a bonus, also create an expression for the classification accuracy:
@@ -193,7 +193,7 @@ for epoch in range(num_epochs):
     train_err = 0
     train_batches = 0
     start_time = time.time()
-    for batch in iterate_minibatches(x_train, y_train, 5, shuffle=True):
+    for batch in iterate_minibatches(x_train, y_train, 10, shuffle=True):
         inputs, targets = batch
         train_err += train_fn(inputs, targets)
         train_batches += 1
@@ -202,7 +202,7 @@ for epoch in range(num_epochs):
     val_err = 0
     val_acc = 0
     val_batches = 0
-    for batch in iterate_minibatches(x_val, y_val, 5, shuffle=False):
+    for batch in iterate_minibatches(x_val, y_val, 10, shuffle=False):
         inputs, targets = batch
         err, acc = val_fn(inputs, targets)
         val_err += err
@@ -222,7 +222,7 @@ for epoch in range(num_epochs):
 test_err = 0
 test_acc = 0
 test_batches = 0
-for batch in iterate_minibatches(x_val, y_val, 5, shuffle=False):
+for batch in iterate_minibatches(x_val, y_val, 10, shuffle=False):
     inputs, targets = batch
     err, acc = val_fn(inputs, targets)
     test_err += err
@@ -250,7 +250,6 @@ print("y_test = \n{}".format(y_test))
 print("x_test.shape = {}".format(x_test.shape))
 print("y_test.shape = {}".format(y_test.shape))
 print("y_test[1,1] = {}".format(y_test[1,:]))
-
 # # save output
 # header = np.array(['Id', 'y']).reshape(1, 2)
 # dump_data = np.hstack((ids_test, y_test))
