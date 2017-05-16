@@ -82,7 +82,7 @@ def compute_feature_vec(orders):
 Model fitting
 """
 # load data
-data_loader = csv_manager.CsvManager('data')
+data_loader = csv_manager.CsvManager('../data')
 #data_train = data_loader.restore_from_file('train.csv')
 
 data_labeled = pd.read_hdf("../data/train_labeled.h5", "train")
