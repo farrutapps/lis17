@@ -82,7 +82,7 @@ def compute_feature_vec(orders):
 Model fitting
 """
 # load data
-data_loader = csv_manager.CsvManager('data')
+data_loader = csv_manager.CsvManager('../data')
 #data_train = data_loader.restore_from_file('train.csv')
 
 data_pandas = pd.read_hdf("../data/train.h5", "train")
@@ -128,7 +128,7 @@ data_cv = np.hstack((ids, y_source, x_source_tf))
 cross_validation = cv.CrossValidation(data_cv, 3)
 
 # switch on/off if cross validation or test data prediction
-cross_validate = True
+cross_validate = False
 
 if cross_validate:
     print 'Doing Cross Validation'
@@ -149,7 +149,6 @@ if cross_validate:
         print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
 
         classifier = MLPClassifier(solver=ps['solver'], alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'], warm_start=True)
-
         holder = sci_holder.ScikitModel(classifier)
 
         # start learning
@@ -174,7 +173,7 @@ else:
     """
     print 'Making test prediction'
 
-    classifier = MLPClassifier(solver='lbfgs', alpha=5, hidden_layer_sizes=(100,100,100,100,100,100,100,100))
+    classifier = MLPClassifier(solver='lbfgs', alpha=50, hidden_layer_sizes=(2000,800), warm_start=True)
     classifier.fit(x_source_tf, y_source.reshape(n_samples))
 
 
