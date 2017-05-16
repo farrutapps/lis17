@@ -85,20 +85,26 @@ Model fitting
 data_loader = csv_manager.CsvManager('data')
 #data_train = data_loader.restore_from_file('train.csv')
 
-data_pandas = pd.read_hdf("../data/train.h5", "train")
-data_train = data_pandas.as_matrix()
-print 'shape of data set: {}'.format(data_train.shape)
-n_samples = data_train.shape[0]
-n_dimensions_x = 100
+data_labeled = pd.read_hdf("../data/train_labeled.h5", "train")
+data_unlabeled = pd.read_hdf("../data/train_unlabeled.h5", "train")
+data_train_labeled = data_labeled.as_matrix()
+data_train_unlabeled = data_unlabeled.as_matrix()
+
+print 'shape of   labeled data set: {}'.format(data_train_labeled.shape)
+print 'shape of unlabeled data set: {}'.format(data_train_unlabeled.shape)
+n_samples_labeled = data_train_labeled.shape[0]
+n_samples_unlabeled = data_train_unlabeled.shape[0]
+n_dimensions_x = 128
 n_dimensions_y = 1
 
 # shuffle order of samples. This makes sure that training and validation sets contain random samples.
-np.random.shuffle(data_train)
+np.random.shuffle(data_train_labeled)
+np.random.shuffle(data_train_unlabeled)
 
-ids = data_pandas.index.values.reshape(n_samples,1)
+ids = data_labeled.index.values.reshape(n_samples_labeled,1)
 
-y_source = data_train[:, 0].reshape(n_samples, n_dimensions_y)
-x_source = data_train[:, 1:].reshape(n_samples, n_dimensions_x)
+y_source = data_train_labeled[:, 0].reshape(n_samples_labeled, n_dimensions_y)
+x_source = data_train_labeled[:, 1:].reshape(n_samples_labeled, n_dimensions_x)
 
 # compute feature vector
 feature_vec = compute_feature_vec([])
@@ -128,42 +134,42 @@ data_cv = np.hstack((ids, y_source, x_source_tf))
 cross_validation = cv.CrossValidation(data_cv, 3)
 
 # switch on/off if cross validation or test data prediction
-cross_validate = True
+cross_validate = False
 
 if cross_validate:
-    print 'Doing Cross Validation'
+    print 'Doing Cross Validation (not adapted yet)'
 
-    param_manager = ParameterManager()
-
-    myrange = [5*x for x in range(1,5)]
-
-    # Define parameters here: (parameter_name, [parameter_values])
-    parameter_settings = [('alpha', myrange), ('layer_size', [(100,100,100,100,100,100,100,100), (50)]),
-                          ('solver',('lbfgs','adam'))]
-
-    # Compute all diferent possible parameter_sets
-    param_manager.compute_parameter_sets(parameter_settings)
-
-    # loop through parameter sets and start computation
-    for ps in param_manager.parameter_sets:
-        print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
-
-        classifier = MLPClassifier(solver=ps['solver'], alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'], warm_start=True)
-
-        holder = sci_holder.ScikitModel(classifier)
-
-        # start learning
-        ps['accuracy'] = cross_validation.start_cross_validation(holder)
-
-        # print results
-        print ps
-
-    #find best result
-    accuracies = [p['accuracy'] for p in param_manager.parameter_sets]
-    best = [p for p in param_manager.parameter_sets if p['accuracy'] == max(accuracies)]
-    print best
-
-    print 'standard deviation of results: {}'.format(np.std(accuracies))
+    # param_manager = ParameterManager()
+    #
+    # myrange = [5*x for x in range(1,5)]
+    #
+    # # Define parameters here: (parameter_name, [parameter_values])
+    # parameter_settings = [('alpha', myrange), ('layer_size', [(100,100,100,100,100,100,100,100), (50)]),
+    #                       ('solver',('lbfgs','adam'))]
+    #
+    # # Compute all diferent possible parameter_sets
+    # param_manager.compute_parameter_sets(parameter_settings)
+    #
+    # # loop through parameter sets and start computation
+    # for ps in param_manager.parameter_sets:
+    #     print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
+    #
+    #     classifier = MLPClassifier(solver=ps['solver'], alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'], warm_start=True)
+    #
+    #     holder = sci_holder.ScikitModel(classifier)
+    #
+    #     # start learning
+    #     ps['accuracy'] = cross_validation.start_cross_validation(holder)
+    #
+    #     # print results
+    #     print ps
+    #
+    # #find best result
+    # accuracies = [p['accuracy'] for p in param_manager.parameter_sets]
+    # best = [p for p in param_manager.parameter_sets if p['accuracy'] == max(accuracies)]
+    # print best
+    #
+    # print 'standard deviation of results: {}'.format(np.std(accuracies))
 
 
 # End Cross validation
@@ -174,8 +180,8 @@ else:
     """
     print 'Making test prediction'
 
-    classifier = MLPClassifier(solver='lbfgs', alpha=5, hidden_layer_sizes=(100,100,100,100,100,100,100,100))
-    classifier.fit(x_source_tf, y_source.reshape(n_samples))
+    classifier = MLPClassifier(solver='lbfgs', alpha=40, hidden_layer_sizes=(2100,1300))
+    classifier.fit(x_source_tf, y_source.reshape(n_samples_labeled))
 
 
     # load test data and transform samples
