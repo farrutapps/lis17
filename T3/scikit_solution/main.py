@@ -6,6 +6,8 @@ import scikit_model as sci_holder
 from sklearn.linear_model import SGDClassifier
 from sklearn import svm
 from sklearn import preprocessing
+from sklearn import decomposition
+
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 import os
@@ -82,7 +84,7 @@ def compute_feature_vec(orders):
 Model fitting
 """
 # load data
-data_loader = csv_manager.CsvManager('data')
+data_loader = csv_manager.CsvManager('../data')
 #data_train = data_loader.restore_from_file('train.csv')
 
 data_pandas = pd.read_hdf("../data/train.h5", "train")
@@ -123,43 +125,60 @@ if scale_data:
     scaler.fit(x_source_tf)
     x_source_tf = scaler.transform(x_source_tf)
 
-# Cross validation
-data_cv = np.hstack((ids, y_source, x_source_tf))
-cross_validation = cv.CrossValidation(data_cv, 3)
+x_to_reduce = x_source_tf
+# Dimensionality reduction
+
+parameter_collection = []
+dim_red = False
 
 # switch on/off if cross validation or test data prediction
 cross_validate = True
-
 if cross_validate:
-    print 'Doing Cross Validation'
+    for comps in [100]:
 
-    param_manager = ParameterManager()
+        if dim_red:
+            print 'components_ {}'.format(comps)
+            reductor = decomposition.TruncatedSVD(n_components=comps)
 
-    myrange = [5*x for x in range(1,5)]
+            print 'dimension reduction'
+            x_source_tf = reductor.fit_transform(x_to_reduce)
 
-    # Define parameters here: (parameter_name, [parameter_values])
-    parameter_settings = [('alpha', myrange), ('layer_size', [(100,100,100,100,100,100,100,100), (50)]),
-                          ('solver',('lbfgs','adam'))]
 
-    # Compute all diferent possible parameter_sets
-    param_manager.compute_parameter_sets(parameter_settings)
+        # Cross validation
+        data_cv = np.hstack((ids, y_source, x_source_tf))
+        cross_validation = cv.CrossValidation(data_cv, 5)
 
-    # loop through parameter sets and start computation
-    for ps in param_manager.parameter_sets:
-        print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
+        print 'Doing Cross Validation'
 
-        classifier = MLPClassifier(solver=ps['solver'], alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'], warm_start=True)
+        param_manager = ParameterManager()
 
-        holder = sci_holder.ScikitModel(classifier)
+        myrange = [x for x in range(30,70 ,10)]
 
-        # start learning
-        ps['accuracy'] = cross_validation.start_cross_validation(holder)
+        # Define parameters here: (parameter_name, [parameter_values])
+        parameter_settings = [('alpha', myrange), ('layer_size', [(2100, 1300)])]
 
-        # print results
-        print ps
+        # Compute all diferent possible parameter_sets
+        param_manager.compute_parameter_sets(parameter_settings)
 
-    #find best result
-    accuracies = [p['accuracy'] for p in param_manager.parameter_sets]
+        # loop through parameter sets and start computation
+        for ps in param_manager.parameter_sets:
+            print 'progress: {}/{}'.format(param_manager.parameter_sets.index(ps), len(param_manager.parameter_sets))
+
+            classifier = MLPClassifier(solver='lbfgs', alpha=ps['alpha'], hidden_layer_sizes=ps['layer_size'])
+
+            holder = sci_holder.ScikitModel(classifier)
+
+            # start learning
+            ps['n_components'] = comps
+            ps['accuracy'] = cross_validation.start_cross_validation(holder)
+
+            # print results
+            print ps
+
+        parameter_collection.append(param_manager.parameter_sets)
+
+    # find best result
+    accuracies = [p['accuracy'] for p in parameter_collection]
     best = [p for p in param_manager.parameter_sets if p['accuracy'] == max(accuracies)]
     print best
 
@@ -174,7 +193,15 @@ else:
     """
     print 'Making test prediction'
 
-    classifier = MLPClassifier(solver='lbfgs', alpha=5, hidden_layer_sizes=(100,100,100,100,100,100,100,100))
+    comps = 90
+    reductor = decomposition.TruncatedSVD(n_components=comps)
+
+    if dim_red:
+        print 'dimension reduction'
+        reductor.fit(x_to_reduce)
+        x_source_tf = reductor.transform(x_to_reduce)
+
+    classifier = MLPClassifier(solver='adam', alpha=50, hidden_layer_sizes=(2100,1300), warm_start=True)
     classifier.fit(x_source_tf, y_source.reshape(n_samples))
 
 
@@ -201,6 +228,12 @@ else:
     elif scale_data:
         print 'scale data'
         x_test_tf = scaler.transform(x_test)
+
+        if dim_red:
+            print 'dimension reduction'
+            x_test_tf = reductor.transform(x_test_tf)
+
+
         y_test = classifier.predict(x_test_tf).reshape(n_samples_test, 1)
 
     else:
